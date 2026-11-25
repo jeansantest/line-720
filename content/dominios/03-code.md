@@ -139,3 +139,198 @@ O `CLAUDE.md` chegou a 900 linhas e regras vêm sendo ignoradas. Qual é a melho
 - [ ] Copiar o arquivo para cada subdiretório
 
 > Contexto permanente compete por atenção. Mantenha só o que vale quase sempre.
+
+## code-11
+tipo: unica
+skill: Claude Code Operation
+
+Um hook `PreToolUse` deve **barrar** um comando. Com qual código de saída ele bloqueia e devolve o motivo a Claude?
+
+- [ ] Qualquer código diferente de zero
+- [x] Código 2, com o motivo no stderr
+- [ ] Código 1, com o motivo no stdout
+- [ ] Código 0, com o motivo no stderr
+
+> Em eventos bloqueáveis, o código 2 impede a ação e mostra o stderr. O código 1, por padrão, é erro não bloqueante: a ação segue.
+
+## code-12
+tipo: unica
+skill: Claude Code Operation
+
+Um time pôs em `PostToolUse` um hook que "impede" editar `prod.yml`, mas o arquivo continua mudando. Por quê?
+
+- [x] O evento ocorre depois que a tool já rodou
+- [ ] O hook precisa ser escrito em JavaScript
+- [ ] Hooks não enxergam o nome dos arquivos
+- [ ] O evento só dispara para comandos de shell
+
+> `PostToolUse` serve para reagir (formatar, testar). Para impedir, use `PreToolUse` ou uma regra deny.
+
+## code-13
+tipo: unica
+skill: Claude Code Operation
+
+As permissões têm `allow: Bash(git push *)` e `deny: Bash(git *)`. O que acontece com `git push origin main`?
+
+- [ ] É permitido, pois a regra é mais específica
+- [ ] Pede confirmação, pois as regras conflitam
+- [ ] É permitido, pois allow foi listado antes
+- [x] É negado, pois deny é avaliado primeiro
+
+> A ordem é deny, ask, allow. A especificidade não muda isso.
+
+## code-14
+tipo: unica
+skill: Claude Code Operation
+
+A empresa precisa de uma política do Claude Code que nenhum desenvolvedor possa sobrepor. Onde defini-la?
+
+- [ ] Em `~/.claude/settings.json`
+- [ ] No `CLAUDE.md` da raiz
+- [x] Em managed settings
+- [ ] Em `.claude/settings.json`
+
+> Managed settings têm a maior precedência. `CLAUDE.md` é contexto, não imposição.
+
+## code-15
+tipo: unica
+skill: Claude Code Operation
+
+Regras de SQL só importam ao editar `db/**`. Como evitar que ocupem contexto nas outras tarefas?
+
+- [ ] Colocá-las no topo do `CLAUDE.md` de cada usuário
+- [x] Regra em `.claude/rules` com `paths` no frontmatter
+- [ ] Um `@import` dessas regras no `CLAUDE.md` da raiz
+- [ ] Repeti-las na descrição de cada commit do time
+
+> Regras com `paths` carregam quando arquivos correspondentes entram em cena. `@import` organiza, mas não economiza contexto.
+
+## code-16
+tipo: unica
+skill: Claude Code Operation
+
+Após `/compact`, Claude Code esqueceu uma convenção. Qual é a causa mais provável?
+
+- [x] Ela foi dita só na conversa, não no `CLAUDE.md`
+- [ ] O `CLAUDE.md` da raiz é apagado ao compactar
+- [ ] O `/compact` desativa as regras de permissão
+- [ ] O comando troca o modelo usado na sessão
+
+> O `CLAUDE.md` da raiz é relido após compactar; instruções só de conversa podem se perder no resumo.
+
+## code-17
+tipo: unica
+skill: Claude Code Operation
+
+Antes de uma mudança arriscada, você quer que Claude explore o código e proponha um caminho **sem editar**. O que usar?
+
+- [ ] Modo acceptEdits
+- [ ] `claude --continue`
+- [ ] Um hook `Stop`
+- [x] Plan mode
+
+> Em plan mode Claude lê e investiga, e apresenta um plano para aprovação.
+
+## code-18
+tipo: unica
+skill: Claude Code Operation
+
+Um script precisa ler a resposta de `claude -p` como um único objeto com metadados da sessão. Qual opção usar?
+
+- [ ] `--output-format stream-json`
+- [ ] `--allowedTools json`
+- [x] `--output-format json`
+- [ ] `--output-format text`
+
+> `json` devolve um objeto; `stream-json` emite eventos conforme ocorrem.
+
+## code-19
+tipo: unica
+skill: Claude Code Operation
+
+Um time usa `--allowedTools "Read"` achando que isso **proíbe** todo o resto. Qual é o efeito real?
+
+- [ ] Vale só para sessões interativas no terminal
+- [x] Pré-aprova Read; o resto segue as permissões
+- [ ] Remove do modelo todas as outras ferramentas
+- [ ] Bloqueia qualquer leitura fora do projeto atual
+
+> A opção é uma lista de aprovação automática. Para proibir, use deny ou remova a tool.
+
+## code-20
+tipo: unica
+skill: Claude Code Operation
+
+Todo o time deve usar o mesmo servidor MCP neste repositório. Onde configurá-lo?
+
+- [x] No `.mcp.json` da raiz, versionado
+- [ ] No `~/.claude.json` de cada pessoa
+- [ ] Em uma Skill com a URL do servidor
+- [ ] No `CLAUDE.md`, como instrução
+
+> O escopo project fica em `.mcp.json` e vai no git. Local e user são pessoais.
+
+## code-21
+tipo: unica
+skill: Claude Code Operation
+
+O `.mcp.json` precisa de um token diferente por pessoa, sem ir para o git. Qual é a forma adequada?
+
+- [ ] Gravar o token e pôr o arquivo no README
+- [ ] Codificar o token em base64 no arquivo
+- [ ] Pedir que Claude solicite o token no chat
+- [x] Referenciar uma variável como `${CRM_TOKEN}`
+
+> Variáveis de ambiente são expandidas na configuração; o segredo fica fora do repositório.
+
+## code-22
+tipo: unica
+skill: Claude Code Operation
+
+Uma Skill de deploy **nunca** deve ser acionada por iniciativa do modelo, só por `/deploy`. O que configurar?
+
+- [ ] Uma descrição vazia no arquivo
+- [ ] Mover a Skill para o `CLAUDE.md`
+- [x] `disable-model-invocation: true`
+- [ ] `allowed-tools: none`
+
+> O campo impede a invocação automática e mantém o comando manual.
+
+## code-23
+tipo: unica
+skill: Claude Code Operation
+
+Um subagent revisor não deve alterar arquivos. Qual configuração garante isso melhor?
+
+- [ ] Escolher um modelo menor para o subagent
+- [x] Campo `tools` só com ferramentas de leitura
+- [ ] Pedir no prompt que ele não edite nada
+- [ ] Dar a ele o mesmo contexto do principal
+
+> A lista de tools é aplicada pelo harness; o prompt é só orientação. Atenção: Bash também permite escrever.
+
+## code-24
+tipo: unica
+skill: Claude Code Operation
+
+Por que checkpoints e `/rewind` não substituem o git?
+
+- [x] Não cobrem tudo, como arquivos mudados só via Bash
+- [ ] Apagam o histórico de commits a cada restauração
+- [ ] Só funcionam em arquivos menores que 1 MB
+- [ ] Exigem uma branch separada para cada prompt
+
+> Checkpoints rastreiam edições das file tools. Mudanças só por Bash ou externas podem ficar de fora.
+
+## code-25
+tipo: unica
+skill: Claude Code Operation
+
+Um job de CI roda `claude -p` em PRs de **desconhecidos**. Qual risco considerar primeiro?
+
+- [ ] O modo `-p` sempre ignora a configuração do projeto
+- [ ] O PR fica privado até o fim da execução do job
+- [ ] O modo `-p` não consegue ler arquivos do repositório
+- [x] O repositório pode trazer hooks e servidores MCP
+
+> Sem isolamento, a configuração do projeto vale sem diálogo de confiança. Restrinja segredos e permissões; `--bare` ignora hooks, MCP e `CLAUDE.md`.

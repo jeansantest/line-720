@@ -193,3 +193,251 @@ Your company requires Claude access to go through Amazon Bedrock, with IAM. What
 - Assuming full parity of features and model IDs
 - Using the default Anthropic client and changing only the base URL
 > Bedrock, Vertex and Foundry differ in authentication, IDs and available features. Claude Platform on AWS is another option: it uses IAM but is operated by Anthropic.
+
+## apps-25
+Goal: answer proposals within one hour. Which item is an **infrastructure** requirement derived from it?
+- The system must generate a draft for each proposal
+- Support 200 concurrent calls at peak, in 2 zones
+- The company wants to close 15% more contracts next year
+- The text of the answers must follow the brand tone
+> Infrastructure is about capacity and availability. The others are a function, a business goal and style.
+
+## apps-26
+Which are **non-functional** requirements of a clinic assistant? (Choose 2)
+- Be available 99.9% of the month
+- Book appointments through chat
+- Isolate the data of each patient
+- Send a reminder the day before
+> Non-functional means a system quality (availability, security). Booking and reminding are functions.
+
+## apps-27
+A maintenance app sends Claude the string `"C:/photos/panel.jpg"` and the model says it sees no image. What is the fix?
+- Ask in the prompt for the model to open the file on disk
+- Convert the photo with OCR, since the API only reads text
+- Use streaming, which makes it possible to send binary files
+- Send an `image` block as base64, a URL or a `file_id`
+> The API does not read your disk. Images go as content blocks, next to the text.
+
+## apps-28
+A job translates 400 records in a serial `for` loop and takes 2 hours. The user expects results in **minutes**. What should you do?
+- Merge the 400 records into a single large request
+- Move everything to the Message Batches API
+- Send them in parallel with bounded concurrency
+- Turn on streaming to speed up each response
+> Independent items parallelize well. Batches may take up to 24 hours; streaming only changes delivery.
+
+## apps-29
+An app has been live for months. The team tracks cost, fixes prompts and plans a model change. Which phase is this?
+- Requirements analysis of the solution
+- Operations and maintenance
+- Architecture design
+- Initial implementation of the system
+> Monitoring, fixing and evolving a live system is operations and maintenance.
+
+## apps-30
+A team wants to write its own 429 retry loop around the **official SDK**. What should it check first?
+- The SDK already retries; tuning `max_retries` may do
+- The SDK does not retry; a custom loop is mandatory here
+- A 429 invalidates the conversation, so a retry cannot work
+- Retries only exist in the Batches API; migration is needed
+> The SDK retries transient errors by itself (2 times by default). An outer loop multiplies attempts.
+
+## apps-31
+A request sets `stop_sequences: ["END"]` and ends on it. Which `stop_reason` does the response carry?
+- `pause_turn`
+- `stop_sequence`
+- `end_turn`
+- `max_tokens`
+> The matched sequence comes in the `stop_sequence` field of the response.
+
+## apps-32
+The code reads `response.content[0].text` and breaks when thinking or tools are on. Why?
+- `content` is a list of blocks of various types
+- `content` becomes a string when tools are on
+- The text is now returned in the HTTP header
+- The first block of text comes encrypted
+> Iterate over the blocks and filter by `type`.
+
+## apps-33
+A batch result comes with type `expired`. What does it mean?
+- The result was available but charged twice
+- The model refused the request due to policy
+- The `custom_id` repeated that of another request
+- The request was not processed within 24 hours
+> Expired requests are not billed; resubmit the missing ones.
+
+## apps-34
+In a batch, 3 of 10 thousand requests return `errored` due to invalid input. What is the right action?
+- Discard the results of all the requests
+- Repeat the three until they succeed
+- Fix and resubmit only those three
+- Resubmit the entire batch unchanged
+> Each request is independent. Invalid input is not solved by repeating it as is.
+
+## apps-35
+Which features do **not** work with the Message Batches API? (Choose 2)
+- System prompt
+- Response streaming
+- Fast mode
+- Tool use
+> Batch is asynchronous: there is no stream and no fast mode.
+
+## apps-36
+A batch finished two months ago and the team wants to download the results. What should it expect?
+- They may no longer be available to download
+- They are kept forever in the company account
+- They are re-sent by e-mail on opening the panel
+- They must be paid for again before downloading
+> Retention is limited (29 days in the docs consulted). Save results in your own system.
+
+## apps-37
+The API responds 404 `not_found_error` right after a configuration change. What should you check first?
+- The available tokens-per-minute budget
+- The size in bytes of the body sent
+- The value of the `retry-after` header
+- The ID of the model or resource used
+> 404 means the resource does not exist, often a mistyped or retired ID.
+
+## apps-38
+The difference between 401 and 403 in the API:
+- 401 is a usage limit; 403, server overload
+- 401 is a large request; 403, invalid JSON
+- 401 is a bad credential; 403, no permission
+- 401 is no permission; 403, a bad credential
+> Neither is solved by retrying.
+
+## apps-39
+A customer wants PDFs with **charts** analyzed. What is correct?
+- Paste the base64 PDF inside the text
+- Send the PDF as a `document` block
+- Extract only text, as images are ignored
+- Convert the PDF into audio before sending
+> The `document` block allows using text and visual content of the pages, within limits.
+
+## apps-40
+A multi-turn conversation via the API gets more expensive with each message. What is the structural cause?
+- The whole history is sent again on every turn
+- The API charges a fixed fee per connected user
+- The model reprocesses turns of other customers
+- The system prompt doubles after every response
+> The API is stateless. Caching, compaction and windowing reduce cost.
+
+## apps-41
+When using **citations** and `output_config.format` in the same request, what happens?
+- Citations become fields of the JSON
+- The schema is silently ignored
+- The response comes in two parts
+- The API rejects it with a 400 error
+> The features are incompatible. Choose one, split into two calls, or see the documented pattern for structured data with citations.
+
+## apps-42
+With structured outputs on, in which cases may the output still **not** follow the schema? (Choose 2)
+- Use of streaming
+- A prompt in Portuguese
+- A cut by `max_tokens`
+- A model refusal
+> Check `stop_reason` before trusting the JSON.
+
+## apps-43
+A chat streams the answer and the user clicks "stop". What should the backend do?
+- Send the same question again without streaming
+- Cancel the request and store it as partial
+- Let the stream go on and hide the rest of it
+- Erase the conversation and start a new session
+> Canceling saves resources; marking it as partial avoids treating it as complete.
+
+## apps-44
+The app serves 5 languages. How do you decide the response language predictably?
+- A system prompt rule with the account language
+- Letting the model choose on each message
+- Translating each answer into all the languages
+- Using a different model for each language
+> An explicit rule plus trusted application data give predictability.
+
+## apps-45
+A legal assistant must show where each claim came from. Which design is most verifiable?
+- A list of links the model writes from memory
+- A confidence score from zero to a hundred
+- A notice that the answer may contain errors
+- Citations tied to the passage shown to the user
+> Structured citations point to the supplied document; links from memory may be made up.
+
+## apps-46
+A screen makes 4 sequential model calls and takes 20 s. Two do not depend on the others. What should you do?
+- Increase the `max_tokens` of all the calls
+- Repeat the slowest calls two times each
+- Parallelize independents and show partials
+- Replace the four calls with a nightly batch
+> Attack the critical path and the perceived latency.
+
+## apps-47
+Prompt, model and schema change together in a release. How do you allow a **safe** rollback?
+- Keep each one in a manually edited panel
+- Version them as a set and deploy together
+- Keep only the prompt, as the rest matters little
+- Note the changes in a shared team document
+> The tested combination is the unit to roll back.
+
+## apps-48
+Which values should vary by **environment**, outside the code? (Choose 2)
+- Access credentials
+- Concurrency limits
+- The JSON validation logic
+- The names of internal functions
+> Per-environment configuration lives outside code; secrets in a secret manager.
+
+## apps-49
+An experiment with a new prompt should reach 5% of users and be switchable off at once. What should you use?
+- A branch that the team publishes at night
+- A notice asking the users to reload
+- A second system under another domain
+- A feature flag with per-variant metrics
+> Flags separate deploy from release and allow comparison and instant shutdown.
+
+## apps-50
+Before retiring a model in use, the provider announces the date. Which plan is adequate?
+- Swap the ID directly in production and observe
+- Copy the old responses into a permanent cache
+- Run evals on the replacement and migrate early
+- Wait for the last day in order to avoid rework
+> Deprecation is a foreseen lifecycle event: inventory, eval, migration and rollback.
+
+## apps-51
+At which phase should the acceptance criteria of an LLM app appear?
+- During the first change of model
+- In requirements, before building
+- After the first serious incident
+- In the project's final documents
+> Early criteria guide design and evals; late ones become rationalization.
+
+## apps-52
+A worker receives SIGTERM in the middle of a 40 s call. Which behavior is correct?
+- Stop taking tasks and finish or requeue
+- Exit at once, ignoring the tasks in progress
+- Restart the call from zero until it finishes
+- Block the signal so as never to be stopped
+> Graceful shutdown avoids losing and duplicating work.
+
+## apps-53
+An app's unit tests call the real API on each commit: slow and flaky. What should you do?
+- Remove the tests that depend on responses
+- Run the tests only once in each quarter
+- Repeat each test until it finally passes
+- Mock the API there and keep evals separate
+> Test logic with doubles; measure model quality in separate evals.
+
+## apps-54
+Claude generated a 2,000-line PR that passes tests. What is the proper practice?
+- Approve it, asking Claude to self-review
+- Always reject it for being AI-generated
+- Split it and review like anyone's code
+- Approve it, since the tests passed cleanly
+> Authorship does not waive review; smaller changes are reviewable.
+
+## apps-55
+The customer asks for "100% correct answers". How do you turn it into a useful requirement?
+- Include the exact phrase in the system prompt
+- Set a measured target and an error path
+- Promise it, as long as the top model is used
+- Drop the topic to avoid raising expectations
+> Combine an acceptable limit per error type with verification, abstention and escalation.

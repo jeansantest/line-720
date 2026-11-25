@@ -61,6 +61,18 @@ for (const f of readdirSync(join(raiz, 'content/dominios')).filter(f => f.endsWi
   for (const b of md.split(/^## /m).slice(1)) questoes.push(questao(b, meta.id));
 }
 
+// ---------- simulado: cenários longos, fora das estações ----------
+const arqs = p => { try { return readdirSync(join(raiz, p)).filter(f => f.endsWith('.md')).sort(); } catch { return []; } };
+for (const f of arqs('content/simulado')) {
+  const md = ler('content/simulado/' + f), dom = (md.match(/^dominio: *(.+)$/m) || [])[1];
+  if (!dominios.some(d => d.id === dom)) { erros.push(`simulado/${f}: dominio inválido`); continue; }
+  for (const b of md.split(/^## /m).slice(1)) {
+    const q = { ...questao(b, dom), sim: true }; questoes.push(q);
+    if (q.tipo === 'ordem') erros.push(`${q.id}: simulado não usa ordem`);
+    if (q.texto.split(' ').length < 25) avisos.push(`${q.id}: cenário de simulado curto (menos de 25 palavras)`);
+  }
+}
+
 // ---------- inglês: só texto; tipo e gabarito vêm do português ----------
 const en = { questoes: {}, briefing: {}, ui: {} };
 for (const f of readdirSync(join(raiz, 'content/dominios')).filter(f => f.endsWith('.md')).sort()) {
@@ -69,9 +81,13 @@ for (const f of readdirSync(join(raiz, 'content/dominios')).filter(f => f.endsWi
   en.briefing[dom] = [...md.split(/^# Questions/m)[0].matchAll(/^- (.+)$/gm)].map(m => m[1]);
   const base = dominios.find(d => d.id === dom).briefing;
   if (en.briefing[dom].length !== base.length) erros.push(`dominios-en/${f}: briefing com ${en.briefing[dom].length} itens, esperado ${base.length}`);
+  traduzir(md, 'dominios-en/' + f, false);
+}
+for (const f of arqs('content/simulado-en')) traduzir(ler('content/simulado-en/' + f), 'simulado-en/' + f, true);
+function traduzir(md, f, sim) {
   for (const b of md.split(/^## /m).slice(1)) {
     const ls = b.split('\n'), id = ls.shift().trim(), q = questoes.find(x => x.id === id);
-    if (!q) { erros.push(`dominios-en/${f}: ${id} não existe em português`); continue; }
+    if (!q || !!q.sim !== sim) { erros.push(`${f}: ${id} não existe no arquivo português equivalente`); continue; }
     if (en.questoes[id]) erros.push(`en ${id}: repetida`);
     const r = { texto: [], ops: [], porque: [] }; let cerca = false;
     for (const l of ls) {
@@ -89,7 +105,7 @@ for (const f of readdirSync(join(raiz, 'content/dominios')).filter(f => f.endsWi
     if (!en.questoes[id].texto || !en.questoes[id].porque) erros.push(`en ${id}: falta enunciado ou explicação`);
   }
 }
-for (const q of questoes) if (!en.questoes[q.id]) erros.push(`${q.id}: falta tradução em dominios-en`);
+for (const q of questoes) if (!en.questoes[q.id]) erros.push(`${q.id}: falta tradução em ${q.sim ? 'simulado-en' : 'dominios-en'}`);
 for (const l of tabelas(ler('content/idiomas.md'))[0]) en.ui[String(l.pt)] = String(l.en);
 for (const f of ['jogo', 'painel', 'metro', 'visual']) for (const m of ler(`src/${f}.js`).matchAll(/\bt\('([^']+)'/g)) if (!en.ui[m[1]]) erros.push(`idiomas.md: falta "${m[1]}" (src/${f}.js)`);
 
@@ -129,5 +145,5 @@ writeFileSync(join(raiz, 'index.html'), html);
 const enLong = Math.round(100 * unicas.filter(q => { const o = en.questoes[q.id].ops, c = q.certas[0]; return o.every((x, i) => i === c || x.length < o[c].length); }).length / unicas.length);
 if (enLong > 45) avisos.push(`inglês: correta mais longa em ${enLong}%`);
 console.log(`Inglês: ${Object.keys(en.questoes).length} questões, correta mais longa: ${enLong}%.`);
-console.log(`index.html gerado: ${questoes.length} questões, ${dominios.length} domínios. Correta mais longa: ${pct}%.`);
+console.log(`index.html gerado: ${questoes.length} questões (${questoes.filter(q => q.sim).length} só do simulado), ${dominios.length} domínios. Correta mais longa: ${pct}%.`);
 avisos.forEach(a => console.log('AVISO: ' + a));

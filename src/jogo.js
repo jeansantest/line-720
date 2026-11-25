@@ -59,7 +59,7 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;'
 const inl = s => esc(s).replace(/`([^`]+)`/g, '<code>$1</code>').replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>').replace(/\*([^*\s][^*]*)\*/g, '<em>$1</em>');
 const md = s => s.split(/```\w*\n([\s\S]*?)```/).map((t, i) => i % 2 ? `<pre><code>${esc(t)}</code></pre>` : t.trim().split(/\n\n+/).filter(Boolean).map(p => `<p>${inl(p)}</p>`).join('')).join('');
 const misturar = a => { a = [...a]; for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
-const doDom = id => D.questoes.filter(q => q.dominio === id);
+const doDom = id => D.questoes.filter(q => q.dominio === id && !q.sim);
 const estacoes = id => { const q = doDom(id), r = []; for (let i = 0; i < q.length; i += TAM) r.push(q.slice(i, i + TAM)); if (r.length > 1 && r.at(-1).length < 3) { const u = r.pop(); r.at(-1).push(...u); } return r; };
 const nomeV = v => Idioma.atual === 'en' ? v.nome_en : v.nome;
 const peso = (id, v = S.versao) => D.pesos.find(p => p.dominio === id)[v];
@@ -240,17 +240,19 @@ function fimViagem(estourou) {
 
 /* ---------- simulado ---------- */
 function antesProva() {
-  const v = versao();
+  const v = versao(), itens = montar(v), novos = itens.filter(q => q.sim && !S.cartas[q.id]).length;
   Cena.esconder();
-  tela(`<div class="pilha"><button class="link" data-a="volta">${t('Voltar ao mapa')}</button><h2>${t('Simulado')}</h2><p style="max-width:62ch">${t('{0} questões em {1} minutos, nos pesos da prova ({2}). Sem ajuda e sem correção até o fim. O relógio continua se você fechar a página.', v.questoes, v.minutos, esc(nomeV(v)))}</p><button class="cheio" data-a="ir">${t('Começar')}</button></div>`,
+  tela(`<div class="pilha"><button class="link" data-a="volta">${t('Voltar ao mapa')}</button><h2>${t('Simulado')}</h2><p style="max-width:62ch">${t('{0} questões em {1} minutos, nos pesos da prova ({2}). Sem ajuda e sem correção até o fim. O relógio continua se você fechar a página.', v.questoes, v.minutos, esc(nomeV(v)))}</p><p style="max-width:62ch">${novos ? t('{0} cenários inéditos neste simulado. Só eles medem de verdade: nota com questão repetida tende a subir.', novos) : t('Você já viu todos os cenários. Esta nota tende a ficar acima da real.')}</p><button class="cheio" data-a="ir">${t('Começar')}</button></div>`,
   { volta: mapa, ir: () => {
-    S.prova = { versao: v.id, i: 0, fim: Date.now() + v.minutos * 6e4, itens: montar(v).map(q => ({ id: q.id, ordem: misturar(q.ops.map((_, i) => i)), resp: [], marca: false })) };
+    S.prova = { versao: v.id, i: 0, fim: Date.now() + v.minutos * 6e4, itens: itens.map(q => ({ id: q.id, ordem: misturar(q.ops.map((_, i) => i)), resp: [], marca: false })) };
     salvar(); prova(); } });
   topoPag();
 }
+// Cenários inéditos primeiro, depois os já vistos, depois questões das estações.
+const poolProva = id => { const s = misturar(D.questoes.filter(q => q.dominio === id && q.sim)); return [...s.filter(q => !S.cartas[q.id]), ...s.filter(q => S.cartas[q.id]), ...misturar(doDom(id).filter(q => q.tipo !== 'ordem'))]; };
 function montar(v) {
   const tot = D.dominios.reduce((s, d) => s + peso(d.id, v.id), 0);
-  const c = D.dominios.map(d => { const ex = peso(d.id, v.id) / tot * v.questoes, pool = misturar(doDom(d.id).filter(q => q.tipo !== 'ordem')); return { ex, pool, n: Math.min(Math.floor(ex), pool.length) }; });
+  const c = D.dominios.map(d => { const ex = peso(d.id, v.id) / tot * v.questoes, pool = poolProva(d.id); return { ex, pool, n: Math.min(Math.floor(ex), pool.length) }; });
   let falta = v.questoes - c.reduce((s, x) => s + x.n, 0);
   while (falta > 0) { const x = c.filter(x => x.n < x.pool.length).sort((a, b) => (b.ex - b.n) - (a.ex - a.n))[0]; if (!x) break; x.n++; falta--; }
   return misturar(c.flatMap(x => x.pool.slice(0, x.n)));

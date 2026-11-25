@@ -167,3 +167,237 @@ O app precisa de resultados atuais da web, sem manter infraestrutura de busca. Q
 - [ ] Um crawler exposto como client tool
 
 > Se a tool pronta resolve, use-a antes de construir.
+
+## tools-13
+tipo: unica
+skill: MCP Server Development
+
+Um servidor MCP roda em um host central e atende centenas de clientes remotos. Qual transporte usar?
+
+- [ ] stdio, iniciado em cada máquina cliente
+- [x] Streamable HTTP, no servidor central
+- [ ] Arquivos em uma pasta de rede comum
+- [ ] Nenhum, pois MCP é só um protocolo local
+
+> stdio serve a um processo local. Para um serviço remoto compartilhado, use Streamable HTTP.
+
+## tools-14
+tipo: unica
+skill: Tool Implementation
+
+Quando o estoque está fora do ar, a tool devolve `""` e o agent inventa quantidades. Qual retorno corrige isso?
+
+- [ ] Um objeto JSON vazio, que é mais fácil de ler
+- [ ] O último estoque conhecido, sem avisar o agent
+- [ ] Nenhum: basta encerrar o agent a cada falha
+- [x] Um erro com a causa e o que tentar em seguida
+
+> Vazio parece "sem dados", não "falhou". Dado antigo sem aviso é pior que um erro honesto.
+
+## tools-15
+tipo: multipla
+skill: Tool Implementation
+
+Você vai expor uma API interna de 60 endpoints a um agent. Quais escolhas ajudam? (Escolha 2)
+
+- [x] Poucas tools, cada uma com um papel claro
+- [ ] Uma tool por endpoint, para dar flexibilidade
+- [x] Retornos só com os campos que o agent usa
+- [ ] Nomes neutros, como `op_1`, para evitar viés
+
+> Toolset é uma interface curada: sem sobreposição, com nomes claros e retornos enxutos.
+
+## tools-16
+tipo: unica
+skill: Tool Implementation
+
+Um extrator precisa **sempre** retornar dados pela tool `save_invoice`, mas às vezes o modelo responde em texto. Em modelos que aceitam, qual ajuste força a chamada?
+
+- [x] `tool_choice` do tipo `tool` com esse nome
+- [ ] `tool_choice` do tipo `auto` com esse nome
+- [ ] Uma descrição de tool escrita em maiúsculas
+- [ ] `max_tokens` menor para evitar texto livre
+
+> `tool` força uma tool específica; `any` força alguma. Vários modelos recentes rejeitam forçar com 400: neles use `auto` com `strict`, ou structured outputs se só quer o JSON.
+
+## tools-17
+tipo: unica
+skill: Tool Implementation
+
+O app deve responder **sem** chamar tools em um turno, mantendo as definições na requisição. Qual opção usar?
+
+- [ ] `tool_choice: any`
+- [ ] `stop_reason: none`
+- [ ] `strict: false`
+- [x] `tool_choice: none`
+
+> `none` impede novas chamadas sem remover as definições.
+
+## tools-18
+tipo: unica
+skill: Tool Implementation
+
+A API retorna 400 após um `tool_use`. O próximo turno user trazia só o texto "ok, continue". O que faltou?
+
+- [ ] Um bloco `thinking` escrito pela aplicação
+- [ ] Uma segunda mensagem assistant vazia
+- [x] O `tool_result` com o `tool_use_id` correspondente
+- [ ] Uma nova definição da tool no system prompt
+
+> Todo `tool_use` precisa do seu `tool_result` no turno user seguinte.
+
+## tools-19
+tipo: unica
+skill: Tool Implementation
+
+Uma tool tem parâmetro com estrutura aninhada incomum, e o modelo erra o formato. Além da descrição, o que ajuda?
+
+- [ ] Um limite maior de tokens de saída
+- [x] Exemplos de entrada válidos na definição
+- [ ] Um nome de tool mais curto e genérico
+- [ ] Um `tool_result` com mais campos
+
+> `input_examples` mostra o uso correto; cada exemplo precisa obedecer ao schema.
+
+## tools-20
+tipo: unica
+skill: Tool Implementation
+
+Em um loop com thinking ativado, o que fazer com os blocos `thinking` ao devolver um `tool_result`?
+
+- [x] Reenviá-los sem qualquer alteração
+- [ ] Removê-los para economizar tokens
+- [ ] Resumi-los em um bloco de texto
+- [ ] Movê-los para o system prompt
+
+> Os blocos do turno devem voltar exatamente como recebidos, inclusive a assinatura; alterá-los pode gerar erro 400.
+
+## tools-21
+tipo: unica
+skill: Tool Implementation
+
+Uma tool de busca devolve 8 MB de JSON. Qual desenho é melhor?
+
+- [ ] Cortar o JSON em um ponto qualquer
+- [ ] Devolver tudo e confiar no compact
+- [ ] Dividir o JSON em oito `tool_result`
+- [x] Paginação e filtros, com padrão enxuto
+
+> Retorno enxuto e pedido sob demanda preserva contexto e continua válido.
+
+## tools-22
+tipo: unica
+skill: Tool Implementation
+
+O modelo chama `create_ticket` duas vezes por causa de um retry. Como evitar duplicatas?
+
+- [ ] Nome de tool no singular
+- [ ] Resposta final mais curta
+- [x] Chave de idempotência na tool
+- [ ] Descrição pedindo só uma chamada
+
+> Efeitos colaterais devem ser seguros para repetir; isso se garante no código.
+
+## tools-23
+tipo: multipla
+skill: Tool Implementation
+
+Quais são boas **descrições** de parâmetro? (Escolha 2)
+
+- [ ] "Usar corretamente"
+- [x] "Moeda ISO 4217, por exemplo BRL"
+- [x] "Período em dias, de 1 a 90"
+- [ ] "Valor do campo"
+
+> Formato, unidade, limites e exemplo tiram o modelo da adivinhação.
+
+## tools-24
+tipo: unica
+skill: MCP Server Development
+
+Um servidor MCP quer expor documentos que o **host** escolhe anexar ao contexto, sem ação. Qual primitiva usar?
+
+- [x] Resource
+- [ ] Tool
+- [ ] Prompt
+- [ ] Elicitation
+
+> Resources são dados controlados pela aplicação; tools são ações escolhidas pelo modelo; prompts, modelos de mensagem escolhidos pelo usuário.
+
+## tools-25
+tipo: unica
+skill: MCP Server Development
+
+Uma tool MCP recebe um CEP inválido. Como o servidor deve sinalizar para o modelo se corrigir?
+
+- [ ] Erro de protocolo JSON-RPC sem mensagem
+- [ ] Encerramento da conexão com o cliente
+- [ ] Resultado vazio, como se fosse sucesso
+- [x] Resultado com `isError: true` e explicação
+
+> Falhas de execução vão no resultado. Erros de protocolo são para coisas como tool desconhecida.
+
+## tools-26
+tipo: unica
+skill: MCP Server Development
+
+Um servidor MCP de terceiros anota sua tool como "somente leitura". Como o cliente deve tratar isso?
+
+- [ ] Como permissão para rodar sem nenhum registro
+- [ ] Como sinal de que a tool não acessa a rede
+- [x] Como dica não confiável, sem dispensar controles
+- [ ] Como garantia, dispensando a aprovação do usuário
+
+> Anotações de servidores não confiáveis não são garantia de comportamento.
+
+## tools-27
+tipo: unica
+skill: MCP Server Development
+
+Um servidor MCP HTTP recebe um token válido, mas emitido para **outro** serviço. O que fazer?
+
+- [ ] Aceitar só nas tools de leitura
+- [x] Rejeitar, pois a audiência não é a dele
+- [ ] Aceitar, pois a assinatura é válida
+- [ ] Aceitar e repassar o token adiante
+
+> O servidor deve validar a audiência; repassar tokens cria o *confused deputy*.
+
+## tools-28
+tipo: unica
+skill: MCP Server Development
+
+Durante uma tool, o servidor MCP precisa de um dado que só o **usuário** tem. Qual recurso do protocolo serve?
+
+- [x] Elicitation
+- [ ] Resource
+- [ ] Prompt
+- [ ] Transporte stdio
+
+> Elicitation pede informação ao usuário por meio do cliente, que controla a interação.
+
+## tools-29
+tipo: unica
+skill: Agentic Customization
+
+Você quer que a Messages API use um servidor MCP direto, pelo **MCP connector**. Qual requisito o servidor tem de cumprir?
+
+- [ ] Rodar via stdio no seu notebook
+- [ ] Expor somente prompts e resources
+- [ ] Estar no mesmo processo do app
+- [x] Ser acessível por URL https
+
+> O connector fala com servidores remotos e usa só tools. Servidor stdio local pede um cliente MCP seu.
+
+## tools-30
+tipo: unica
+skill: Agentic Customization
+
+Uma Skill com ótimo conteúdo quase nunca é acionada. O que revisar primeiro?
+
+- [ ] A ordem dos títulos dentro do arquivo
+- [ ] O nome da pasta onde o projeto está
+- [x] A descrição: o que faz e quando usar
+- [ ] O tamanho dos scripts que ela contém
+
+> Só nome e descrição ficam visíveis antes; é por eles que o modelo decide carregar.

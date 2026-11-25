@@ -96,3 +96,147 @@ The app needs current web results without maintaining search infrastructure. Wha
 - A Skill with saved links
 - A crawler exposed as a client tool
 > If the ready-made tool solves it, use it before building.
+
+## tools-13
+An MCP server runs on a central host and serves hundreds of remote clients. Which transport should you use?
+- stdio, started on each client machine
+- Streamable HTTP, on the central server
+- Files in a commonly shared network folder
+- None, since MCP is only a local protocol
+> stdio serves a local process. For a shared remote service, use Streamable HTTP.
+
+## tools-14
+When inventory is down, the tool returns `""` and the agent makes up quantities. Which return fixes this?
+- An empty JSON object, which is easier to read
+- The last known stock, without telling the agent
+- None: simply end the agent run on each failure
+- An error with the cause and what to try next
+> Empty looks like "no data", not "failed". Stale data without notice is worse than an honest error.
+
+## tools-15
+You will expose an internal API with 60 endpoints to an agent. Which choices help? (Choose 2)
+- Few tools, each of them with a clear role
+- One tool per endpoint, for full flexibility
+- Returns with only the fields the agent uses
+- Neutral names, such as `op_1`, to avoid bias
+> A toolset is a curated interface: no overlap, clear names and lean returns.
+
+## tools-16
+An extractor must **always** return data through the `save_invoice` tool, but sometimes the model answers in text. On models that accept it, which setting forces the call?
+- `tool_choice` of type `tool` with that name
+- `tool_choice` of type `auto` with that name
+- A tool description written in capital letters
+- A lower `max_tokens` to avoid any free text
+> `tool` forces a specific tool; `any` forces some tool. Several recent models reject forcing with a 400: there use `auto` with `strict`, or structured outputs if you only want the JSON.
+
+## tools-17
+The app must answer **without** calling tools in one turn, keeping their definitions in the request. Which option should you use?
+- `tool_choice: any`
+- `stop_reason: none`
+- `strict: false`
+- `tool_choice: none`
+> `none` prevents new calls without removing the definitions.
+
+## tools-18
+The API returns 400 after a `tool_use`. The next user turn held only the text "ok, go on". What was missing?
+- A `thinking` block written by the application
+- A second assistant message that is empty
+- The `tool_result` with the matching `tool_use_id`
+- A new definition of the tool in the system prompt
+> Every `tool_use` needs its `tool_result` in the next user turn.
+
+## tools-19
+A tool has a parameter with an unusual nested structure, and the model gets the format wrong. Besides the description, what helps?
+- A higher limit of output tokens
+- Valid input examples in the definition
+- A shorter and more generic tool name
+- A `tool_result` holding more fields
+> `input_examples` shows correct usage; each example must satisfy the schema.
+
+## tools-20
+In a loop with thinking enabled, what should you do with `thinking` blocks when returning a `tool_result`?
+- Send them back without any change
+- Remove them in order to save tokens
+- Summarize them into a text block
+- Move them into the system prompt
+> The blocks of the turn must go back exactly as received, signature included; changing them can cause a 400 error.
+
+## tools-21
+A search tool returns 8 MB of JSON. Which design is better?
+- Cutting the JSON at some arbitrary point
+- Returning everything and relying on compact
+- Splitting the JSON into eight `tool_result`
+- Pagination and filters, with lean defaults
+> Lean, on-demand results preserve context and remain valid.
+
+## tools-22
+The model calls `create_ticket` twice because of a retry. How do you avoid duplicates?
+- A tool name in the singular form
+- A final answer that is shorter
+- An idempotency key in the tool
+- A description asking for one call
+> Side effects must be safe to repeat; that is guaranteed in code.
+
+## tools-23
+Which are good parameter **descriptions**? (Choose 2)
+- "Use it correctly"
+- "ISO 4217 currency, for example BRL"
+- "Period in days, from 1 to 90"
+- "Value of the field"
+> Format, unit, limits and an example remove guesswork.
+
+## tools-24
+An MCP server wants to expose documents that the **host** chooses to attach to context, with no action. Which primitive fits?
+- Resource
+- Tool
+- Prompt
+- Elicitation
+> Resources are application-controlled data; tools are model-chosen actions; prompts are user-chosen message templates.
+
+## tools-25
+An MCP tool receives an invalid postal code. How should the server signal so that the model can fix it?
+- A JSON-RPC protocol error with no message
+- Closing the connection with the client
+- An empty result, as if it had succeeded
+- A result with `isError: true` and details
+> Execution failures go in the result. Protocol errors are for things like an unknown tool.
+
+## tools-26
+A third-party MCP server annotates its tool as "read-only". How should the client treat that?
+- As permission to run without any log entry
+- As a sign that the tool has no network access
+- As an untrusted hint, keeping the controls
+- As a guarantee, skipping the user's approval
+> Annotations from untrusted servers are not a guarantee of behavior.
+
+## tools-27
+An HTTP MCP server receives a valid token, but issued for **another** service. What should it do?
+- Accept it only for the reading tools
+- Reject it, since the audience is not its own
+- Accept it, since the signature is valid
+- Accept it and pass the token along
+> The server must validate the audience; passing tokens through creates the confused deputy.
+
+## tools-28
+During a tool call, the MCP server needs data only the **user** has. Which protocol feature fits?
+- Elicitation
+- Resource
+- Prompt
+- stdio transport
+> Elicitation requests information from the user through the client, which controls the interaction.
+
+## tools-29
+You want the Messages API to use an MCP server directly through the **MCP connector**. Which requirement must the server meet?
+- Run over stdio on your own laptop
+- Expose only prompts and resources
+- Live in the same process as the app
+- Be reachable through an https URL
+> The connector talks to remote servers and uses only tools. A local stdio server needs your own MCP client.
+
+## tools-30
+A Skill with great content is almost never triggered. What should you review first?
+- The order of the headings in the file
+- The name of the folder of the project
+- The description: what it does and when
+- The size of the scripts that it contains
+> Only name and description are visible beforehand; they drive the decision to load.

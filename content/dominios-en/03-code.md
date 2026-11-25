@@ -79,3 +79,123 @@ Which situations call for a **subagent** in Claude Code? (Choose 2)
 - Split it into `@` imports, all loaded at startup
 - Copy the file into every subdirectory
 > Permanent context competes for attention. Keep only what almost always applies.
+
+## code-11
+A `PreToolUse` hook must **stop** a command. Which exit code blocks it and returns the reason to Claude?
+- Any code that is different from zero
+- Code 2, with the reason on stderr
+- Code 1, with the reason on stdout
+- Code 0, with the reason on stderr
+> On blockable events, code 2 prevents the action and shows stderr. Code 1 is by default a non-blocking error: the action goes ahead.
+
+## code-12
+A team put a hook on `PostToolUse` that "prevents" editing `prod.yml`, but the file keeps changing. Why?
+- The event fires after the tool already ran
+- The hook must be written in JavaScript
+- Hooks cannot see the names of the files
+- The event only fires for shell commands
+> `PostToolUse` is for reacting (format, test). To prevent, use `PreToolUse` or a deny rule.
+
+## code-13
+Permissions contain `allow: Bash(git push *)` and `deny: Bash(git *)`. What happens with `git push origin main`?
+- It is allowed, since the rule is more specific
+- It asks for approval, since the rules conflict
+- It is allowed, since allow was listed before
+- It is denied, since deny is evaluated first
+> The order is deny, ask, allow. Specificity does not change it.
+
+## code-14
+The company needs a Claude Code policy that no developer can override. Where should it be defined?
+- In `~/.claude/settings.json`
+- In the root `CLAUDE.md`
+- In managed settings
+- In `.claude/settings.json`
+> Managed settings have the highest precedence. `CLAUDE.md` is context, not enforcement.
+
+## code-15
+SQL rules matter only when editing `db/**`. How do you keep them out of context in other tasks?
+- Putting them at the top of each user `CLAUDE.md`
+- A rule in `.claude/rules` with `paths` frontmatter
+- An `@import` of these rules in the root `CLAUDE.md`
+- Repeating them in each commit message of the team
+> Rules with `paths` load when matching files come into play. `@import` organizes but does not save context.
+
+## code-16
+After `/compact`, Claude Code forgot a convention. What is the most likely cause?
+- It was said only in chat, not in `CLAUDE.md`
+- The root `CLAUDE.md` is erased by compaction
+- The `/compact` command disables permissions
+- The command changes the model of the session
+> The root `CLAUDE.md` is re-read after compaction; chat-only instructions may be lost in the summary.
+
+## code-17
+Before a risky change, you want Claude to explore the code and propose a path **without editing**. What should you use?
+- acceptEdits mode
+- `claude --continue`
+- A `Stop` hook
+- Plan mode
+> In plan mode Claude reads and investigates, then presents a plan for approval.
+
+## code-18
+A script needs to read the `claude -p` response as a single object with session metadata. Which option should it use?
+- `--output-format stream-json`
+- `--allowedTools json`
+- `--output-format json`
+- `--output-format text`
+> `json` returns one object; `stream-json` emits events as they happen.
+
+## code-19
+A team uses `--allowedTools "Read"` believing it **forbids** everything else. What is the actual effect?
+- It applies only to interactive terminal sessions
+- It pre-approves Read; the rest follows permissions
+- It removes all the other tools from the model
+- It blocks any reading outside the current project
+> The option is an auto-approve list. To forbid, use deny or remove the tool.
+
+## code-20
+The whole team should use the same MCP server in this repository. Where should it be configured?
+- In the root `.mcp.json`, versioned
+- In each person's `~/.claude.json`
+- In a Skill with the server URL
+- In `CLAUDE.md`, as an instruction
+> Project scope lives in `.mcp.json` and goes in git. Local and user are personal.
+
+## code-21
+The `.mcp.json` needs a different token per person, kept out of git. What is the proper way?
+- Write the token and mention it in the README
+- Encode the token as base64 inside the file
+- Have Claude ask for the token in the chat
+- Reference a variable such as `${CRM_TOKEN}`
+> Environment variables are expanded in the configuration; the secret stays out of the repository.
+
+## code-22
+A deploy Skill must **never** be triggered on the model's initiative, only by `/deploy`. What should you configure?
+- An empty description in the file
+- Moving the Skill to `CLAUDE.md`
+- `disable-model-invocation: true`
+- `allowed-tools: none`
+> The field prevents automatic invocation and keeps the manual command.
+
+## code-23
+A reviewer subagent must not change files. Which configuration best guarantees that?
+- Choosing a smaller model for the subagent
+- A `tools` field with read-only tools
+- Asking in its prompt not to edit files
+- Giving it the same context as the parent
+> The tool list is enforced by the harness; a prompt is only guidance. Note that Bash can also write.
+
+## code-24
+Why do checkpoints and `/rewind` not replace git?
+- They miss things, like files changed only via Bash
+- They erase the commit history on each restore
+- They work only on files that are smaller than 1 MB
+- They require a separate branch for every prompt
+> Checkpoints track file-tool edits. Bash-only or external changes may be left out.
+
+## code-25
+A CI job runs `claude -p` on PRs from **strangers**. Which risk should you consider first?
+- The `-p` mode always ignores project configuration
+- The PR stays private until the job run is finished
+- The `-p` mode cannot read files in the repository
+- The repository may bring hooks and MCP servers
+> Without isolation, project configuration applies with no trust dialog. Restrict secrets and permissions; `--bare` skips hooks, MCP and `CLAUDE.md`.

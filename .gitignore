@@ -28,3 +28,6 @@ linha720*.json
 line720*.json
 
 # index.html é gerado, mas vai para o repositório: é o jogo pronto para abrir.
+
+# Materiais de estudo de terceiros (só neste computador)
+fontes/

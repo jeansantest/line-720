@@ -79,6 +79,8 @@ A coluna `pt` é a chave usada no código (`t('...')`). Para mudar o português,
 | Repetir | Retry |
 | Mapa | Map |
 | Simulado | Mock exam |
+| {0} cenários inéditos neste simulado. Só eles medem de verdade: nota com questão repetida tende a subir. | {0} unseen scenarios in this mock. Only those truly measure you: scores on repeated questions tend to rise. |
+| Você já viu todos os cenários. Esta nota tende a ficar acima da real. | You have seen every scenario. This score is likely to be above your real one. |
 | {0} questões em {1} minutos, nos pesos da prova ({2}). Sem ajuda e sem correção até o fim. O relógio continua se você fechar a página. | {0} questions in {1} minutes, with the exam's weights ({2}). No help and no feedback until the end. The clock keeps running if you close the page. |
 | Começar | Start |
 | Questão {0} de {1} | Question {0} of {1} |

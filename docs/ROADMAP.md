@@ -2,6 +2,9 @@
 - [x] v1: desenvolvedor (CCDV-F), estações, revisão, simulado
 - [x] v1.2: chama animada, medalhão de nível, missões redesenhadas
 - [x] v1.1: cidade, trem animado, sons, missões diárias, garagem
+- [x] v1.4: 280 questões e mapa em serpentina
+- [x] v1.5: banco do simulado, 70 cenários longos
+- [ ] Segundo simulado inédito (mais 70 cenários)
 - [ ] Conferir com o guia oficial v1.1
 - [ ] Mais questões por skill; revisão por quem já fez a prova
 - [ ] Laboratório: depurar request/trace interativo

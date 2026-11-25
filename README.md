@@ -10,6 +10,7 @@ Projeto independente, sem vínculo com a Anthropic. As questões são autorais.
 |---|---|
 | Questões e briefings | `content/dominios/*.md` |
 | Questões e briefings em inglês | `content/dominios-en/*.md` |
+| Cenários longos do simulado (pt/en) | `content/simulado/*.md`, `content/simulado-en/*.md` |
 | Textos da interface (pt/en) | `content/idiomas.md` |
 | Pesos da prova, tempo, nº de questões | `content/prova.md` |
 | Dificuldade, XP, custos, poderes | `content/balanceamento.md` |

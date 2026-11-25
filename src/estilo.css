@@ -156,5 +156,5 @@ footer{margin-top:40px;font-size:14px;color:var(--suave)}
 .terminal .t720{font-size:clamp(44px,8vw,76px);font-weight:800;letter-spacing:-.05em;line-height:.9;color:#ffc928}.terminal.cheio .t720{text-shadow:0 0 24px #ffc928}
 .t-info{flex:1;min-width:0;display:grid;gap:8px;font-size:18px}.terminal .grossa{background:#0f2130}
 .terminal button{background:#ffc928;border-color:#ffc928;color:#2d1b00;box-shadow:0 5px 0 #a87b00;white-space:nowrap}
-@media(max-width:700px){.lado{justify-items:start}.pt{width:46px;height:46px;margin:-23px 0 0 -23px;border-width:5px}.rotulo{font-size:14px;gap:7px}.rotulo span{display:none}.terminal{flex-wrap:wrap;gap:12px}.terminal button{width:100%}.pt small{font-size:14px}}
+@media(max-width:700px){.lado{justify-items:start}.pt{width:40px;height:40px;margin:-20px 0 0 -20px;border-width:4px}.rotulo{font-size:14px;gap:7px}.rotulo span{display:none}.terminal{flex-wrap:wrap;gap:12px}.terminal button{width:100%}.pt small{font-size:14px}}
 @media(prefers-reduced-motion:reduce){.vias .fluxo,.pt.prox,.pt.prox::after{animation:none}}

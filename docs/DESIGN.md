@@ -16,7 +16,7 @@
 **Modos**
 1. *Estações*: 5 questões, feedback imediato, 1–3 estrelas; 60% libera a próxima.
 2. *Revisão*: repetição espaçada (caixas Leitner; intervalos em `balanceamento.md`).
-3. *Simulado*: pesos e tempo da prova, sem ajuda nem feedback até o fim.
+3. *Simulado*: pesos e tempo da prova, sem ajuda nem feedback até o fim. Usa primeiro os cenários inéditos de `content/simulado/`, depois os já vistos, depois questões das estações. Cenários não contam no domínio nem acendem janelas; erros entram na revisão.
 
 **Nota de treino:** 100 + 900 × acerto. A Anthropic não publica a conversão real, então é só referência.
 
@@ -48,3 +48,4 @@ Marcação em `src/painel.js`, estilo no fim de `src/estilo.css`, regras em `src
 ## Idioma e mapa (v1.3)
 - Seletor PT/EN no topo da tela inicial. Trocar não altera progresso; primeira vez segue o idioma do navegador.
 - Mapa: cada linha é um domínio, espessura = peso, trecho aceso = estações concluídas, estação amarela = próxima, cadeado = bloqueada. Todas descem até a estação 720, onde fica o simulado; a linha só acende até lá quando completa.
+- Linhas com muitas estações viram serpentina; a última fila sempre segue para a direita, rumo à 720.
