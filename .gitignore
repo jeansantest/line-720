@@ -1,0 +1,30 @@
+# Sistema operacional
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editores e configurações locais
+.vscode/
+.idea/
+.claude/
+*.code-workspace
+*.swp
+
+# Segredos
+.env
+.env.*
+*.pem
+*.key
+
+# Dependências, logs e temporários
+node_modules/
+*.log
+*.tmp
+*.bak
+tmp/
+
+# Progresso exportado pelo jogo
+linha720*.json
+line720*.json
+
+# index.html é gerado, mas vai para o repositório: é o jogo pronto para abrir.
